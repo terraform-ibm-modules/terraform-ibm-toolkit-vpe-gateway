@@ -1,7 +1,7 @@
 module "redis" {
   source = "github.com/cloud-native-toolkit/terraform-ibm-redis"
 
-  provision = true
-  resource_group_name = module.resource_group.name
-  name_prefix = var.name_prefix
+  resource_group_name      = var.resource_group_name
+  resource_location        = var.region
+  name_prefix              = var.name_prefix
 }
