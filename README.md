@@ -1,23 +1,6 @@
-# Starter kit for a Terraform module
+# Virtual Private Gateway module
 
-This is a Starter kit to help with the creation of Terraform modules. The basic structure of a Terraform module is fairly
-simple and consists of the following basic values:
-
-- README.md - provides a description of the module
-- main.tf - defiens the logic for the module
-- variables.tf (optional) - defines the input variables for the module
-- outputs.tf (optional) - defines the values that are output from the module
-
-Beyond those files, any other content can be added and organized however you see fit. For example, you can add a `scripts/` directory
-that contains shell scripts executed by a `local-exec` `null_resource` in the terraform module. The contents will depend on what your
-module does and how it does it.
-
-## Instructions for creating a new module
-
-1. Update the title and description in the README to match the module you are creating
-2. Fill out the remaining sections in the README template as appropriate
-3. Implement your logic in the in the main.tf, variables.tf, and outputs.tf
-4. Use releases/tags to manage release versions of your module
+Module to provision a Virtual Private Gateway for a provided resource into a provided set of subnets. It is expected that the subnets and the resource (e.g. object storage) have already been provisioned either at a previous time or by the appropriate terraform modules. This module takes the crn of the resource and the ids of the subnets as input then connects the two together with a Virtual Private Gateway. The result of this module will be a virtual private endpoint created in each of the subnets that provides a private network path between the VPC network and the resource through the gateway.
 
 ## Software dependencies
 
@@ -25,35 +8,35 @@ The module depends on the following software components:
 
 ### Command-line tools
 
-- terraform - v12
-- kubectl
+- terraform - v13
 
 ### Terraform providers
 
-- IBM Cloud provider >= 1.5.3
-- Helm provider >= 1.1.1 (provided by Terraform)
+- IBM Cloud provider >= 1.22.0
 
 ## Module dependencies
 
 This module makes use of the output from other modules:
 
-- Cluster - github.com/ibm-garage-cloud/terraform-ibm-container-platform.git
-- Namespace - github.com/ibm-garage-clout/terraform-cluster-namespace.git
-- etc
+- Resource group - github.com/cloud-native-toolkit/terraform-ibm-resource-grou
+- VPC - github.com/cloud-native-toolkit/terraform-ibm-vpc
+- VPC Subnets - github.com/cloud-native-toolkit/terraform-ibm-vpc-subnets
+- Resource module - [Any one of the modules that provision resources on IBM Cloud]
 
 ## Example usage
 
 ```hcl-terraform
-module "dev_tools_argocd" {
-  source = "github.com/ibm-garage-cloud/terraform-tools-argocd.git?ref=v1.0.0"
+module "vpe" {
+  source = "github.com/cloud-native-toolkit/terraform-ibm-vpe-gateway.git"
 
-  cluster_config_file = module.dev_cluster.config_file_path
-  cluster_type        = module.dev_cluster.type
-  app_namespace       = module.dev_cluster_namespaces.tools_namespace_name
-  ingress_subdomain   = module.dev_cluster.ingress_hostname
-  olm_namespace       = module.dev_software_olm.olm_namespace
-  operator_namespace  = module.dev_software_olm.target_namespace
-  name                = "argocd"
+  resource_group_name = module.resource_group.name
+  region              = var.region
+  ibmcloud_api_key    = var.ibmcloud_api_key
+  name_prefix         = var.name_prefix
+  vpc_id              = module.vpc.id
+  vpc_subnets         = module.subnets.subnets
+  vpc_subnet_count    = module.subnets.count
+  resource_label      = "cos"
+  resource_crn        = module.cos.crn
 }
 ```
-
