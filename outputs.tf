@@ -1,5 +1,4 @@
-#output "myoutput" {
-#  description = "Description of my output"
-#  value       = "value"
-#  depends_on  = [<some resource>]
-#}
+output "id" {
+  description = "The id of the created VPE gateway"
+  value       = ibm_is_virtual_endpoint_gateway.vpe-gateway.id
+}
