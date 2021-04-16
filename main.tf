@@ -7,6 +7,9 @@ resource null_resource print_names {
   provisioner "local-exec" {
     command = "echo 'Resource group name: ${var.resource_group_name}'"
   }
+  provisioner "local-exec" {
+    command = "echo 'Resource crn: ${var.resource_crn}'"
+  }
 }
 
 data ibm_resource_group resource_group {
