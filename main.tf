@@ -40,7 +40,7 @@ resource ibm_is_virtual_endpoint_gateway vpe-gateway {
 
   target {
     crn = var.resource_crn
-    resource_type = "provider_cloud_service"
+    resource_type = var.resource_type
   }
 
   # One reserved IP per zone in the VPC in the VPE subnets

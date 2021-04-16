@@ -8,6 +8,6 @@ module "vpe" {
   vpc_id              = module.vpc.id
   vpc_subnets         = module.subnets.subnets
   vpc_subnet_count    = module.subnets.count
-  resource_label      = "cos"
-  resource_crn        = module.cos.crn
+  resource_label      = "redis"
+  resource_crn        = module.redis.id
 }
