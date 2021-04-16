@@ -24,7 +24,14 @@ data ibm_is_subnet subnets {
   identifier = var.vpc_subnets[count.index].id
 }
 
+resource time_sleep wait_for_resource_initialization {
+  depends_on = [null_resource.print_names]
+
+  create_duration = "5m"
+}
+
 resource ibm_is_virtual_endpoint_gateway vpe-gateway {
+  depends_on = [time_sleep.wait_for_resource_initialization]
 
   name           = local.name
   vpc            = var.vpc_id
