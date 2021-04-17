@@ -1,11 +1,94 @@
 id: github.com/cloud-native-toolkit/terraform-ibm-vpe-gateway
-name: ""
+name: ibm-vpe-gateway
+alias: vpe
 type: terraform
-description: ""
+description: Provisions a Virtual Private Gateway for a provided resource, connecting that resource to the provided subnet
 tags:
-  - tools
-  - devops
+  - infrastructure
+  - network
+  - virtual private gateway
+  - fscloud
 versions:
+  - platforms: []
+    dependencies:
+      - id: resource_group
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-ibm-resource-group
+            version: ">= 1.0.0"
+      - id: vpc
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-ibm-vpc
+            version: ">= 1.0.0"
+      - id: subnets
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-ibm-vpc-subnets
+            version: ">= 1.0.0"
+      - id: resource
+        refs: []
+        optional: true
+    variables:
+      - name: resource_group_name
+        moduleRef:
+          id: resource_group
+          output: name
+        type: string
+        description: The name of the IBM Cloud resource group where the VPC gateways will be created.
+      - name: region
+        scope: global
+        type: string
+        description: The IBM Cloud region where the cluster will be/has been installed.
+      - name: ibmcloud_api_key
+        scope: global
+        type: string
+        description: The IBM Cloud api token
+      - name: name_prefix
+        scope: global
+        type: string
+        description: The name of the vpc resource
+        default: ""
+        optional: true
+      - name: vpc_id
+        moduleRef:
+          id: vpc
+          output: id
+        type: string
+        description: The id of the vpc instance
+      - name: vpc_subnets
+        moduleRef:
+          id: subnets
+          output: subnets
+        type: |-
+          list(object({
+              label = string
+              id    = string
+              zone  = string
+            }))
+        description: List of subnets with labels
+      - name: vpc_subnet_count
+        moduleRef:
+          id: subnets
+          output: count
+        type: number
+        description: Number of vpc subnets
+      - name: resource_crn
+        moduleRef:
+          id: resource
+          output: crn
+        type: string
+        description: The crn of the resource to which the vpe will be connected.
+      - name: resource_label
+        scope: module
+        type: string
+        description: The label for the resource to which the vpe will be connected. Used as a tag and as part of the vpe name.
+      - name: resource_type
+        type: string
+        description: The endpoint gateway target resource type. Values can be provider_cloud_service, provider_infrastructure_service, ?.
+        default: provider_cloud_service
+        optional: true
+    version: v1.0.0
+    outputs:
+      - name: id
+        description: The id of the created VPE gateway
   - platforms:
       - kubernetes
       - ocp3
@@ -27,28 +110,3 @@ versions:
     #          version: ">= 1.6.0"
     variables: []
     version: v0.0.0
-#    - name: cluster_type
-#      moduleRef:
-#        id: cluster
-#        output: type_code
-#    - name: cluster_ingress_hostname
-#      moduleRef:
-#        id: cluster
-#        output: ingress_hostname
-#    - name: cluster_config_file
-#      moduleRef:
-#        id: cluster
-#        output: config_file_path
-#    - name: tls_secret_name
-#      moduleRef:
-#        id: cluster
-#        output: tls_secret_name
-#    - name: releases_namespace
-#      moduleRef:
-#        id: namespace
-#        output: name
-#        discriminator: tools
-#    - name: icon_url
-#      moduleRef:
-#        id: dashboard
-#        output: base_icon_url
