@@ -5,4 +5,5 @@ module "redis" {
   resource_location   = var.region
   name_prefix         = var.name_prefix
   ibmcloud_api_key    = var.ibmcloud_api_key
+  private_endpoints   = true
 }
