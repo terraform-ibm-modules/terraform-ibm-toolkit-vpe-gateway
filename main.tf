@@ -18,8 +18,14 @@ resource null_resource setup {
   }
 }
 
-resource null_resource get-endpoint-target {
+resource time_sleep wait_for_resource_initialization {
   depends_on = [null_resource.setup]
+
+  create_duration = "5m"
+}
+
+resource null_resource get-endpoint-target {
+  depends_on = [null_resource.setup, time_sleep.wait_for_resource_initialization]
 
   provisioner "local-exec" {
     command = "${path.module}/scripts/get-endpoint-target.sh ${var.resource_crn} ${var.resource_service} ${var.region} ${var.resource_group_name} ${local.crn_file_name}"
@@ -47,12 +53,6 @@ data ibm_is_subnet subnets {
   count = var.vpc_subnet_count
 
   identifier = var.vpc_subnets[count.index].id
-}
-
-resource time_sleep wait_for_resource_initialization {
-  depends_on = [null_resource.setup]
-
-  create_duration = "5m"
 }
 
 resource ibm_is_virtual_endpoint_gateway vpe-gateway {
