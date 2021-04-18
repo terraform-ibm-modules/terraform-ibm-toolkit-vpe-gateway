@@ -40,6 +40,6 @@ if [[ -z "$(cat "${OUTPUT_FILE}")" ]]; then
   exit 1
 else
   echo "Found matching resource:"
-  echo "  CRN:           $(cat "${TMP_OUTPUT}" | jq '.crn')"
-  echo "  Resource type: $(cat "${TMP_OUTPUT}" | jq '.resource_type')"
+  echo "  CRN:           $(cat "${OUTPUT_FILE}" | jq '.crn')"
+  echo "  Resource type: $(cat "${OUTPUT_FILE}" | jq '.resource_type')"
 fi
