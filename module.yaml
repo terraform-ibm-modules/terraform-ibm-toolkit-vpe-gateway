@@ -52,5 +52,9 @@ versions:
       moduleRef:
         id: resource
         output: crn
+    - name: resource_service
+      moduleRef:
+        id: resource
+        output: service
     - name: resource_label
       scope: module
