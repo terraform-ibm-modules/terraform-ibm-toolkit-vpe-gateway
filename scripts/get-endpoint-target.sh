@@ -35,6 +35,8 @@ fi
 
 if [[ -z "$(cat "${OUTPUT_FILE}")" ]]; then
   echo "The output file is empty"
+  # Create the file with an empty object to satisy destroy
+  echo "{}" > "${OUTPUT_FILE}"
   exit 1
 else
   echo "Found matching resource:"
