@@ -8,7 +8,7 @@ module "vpe-cos" {
   vpc_id              = module.vpc.id
   vpc_subnets         = module.subnets.subnets
   vpc_subnet_count    = module.subnets.count
-  resource_label      = "cos"
+  resource_label      = module.cos.label
   resource_crn        = module.cos.id
   resource_service    = module.cos.service
 }

@@ -8,7 +8,7 @@ module "vpe-redis" {
   vpc_id              = module.vpc.id
   vpc_subnets         = module.subnets.subnets
   vpc_subnet_count    = module.subnets.count
-  resource_label      = "redis"
+  resource_label      = module.redis.label
   resource_crn        = module.redis.id
   resource_service    = module.redis.service
 }
