@@ -49,7 +49,7 @@ variable "resource_crn" {
   description = "The crn of the resource to which the vpe will be connected."
 }
 
-variable "resource_type" {
+variable "resource_service" {
   type        = string
   description = "The endpoint gateway target resource type. Values can be provider_cloud_service, provider_infrastructure_service, ?."
   default     = "provider_cloud_service"
