@@ -30,13 +30,14 @@ if [[ "${SERVICE}" == "cloud-object-storage" ]]; then
 else
   echo "Looking up crn: ${CRN}"
   cat "${TMP_OUTPUT}" | \
-    jq --arg CRN "${CRN}" '.[] | select(.crn) | select(.crn == $CRN))' > "${OUTPUT_FILE}"
+    jq --arg CRN "${CRN}" '.[] | select(.crn) | select(.crn == $CRN)' > "${OUTPUT_FILE}"
 fi
 
 if [[ -z "$(cat "${OUTPUT_FILE}")" ]]; then
   echo "The output file is empty"
   exit 1
 else
-  echo "Found matching resources"
-  cat "${TMP_OUTPUT}"
+  echo "Found matching resource:"
+  echo "  CRN:           $(cat "${TMP_OUTPUT}" | jq '.crn')"
+  echo "  Resource type: $(cat "${TMP_OUTPUT}" | jq '.resource_type')"
 fi
