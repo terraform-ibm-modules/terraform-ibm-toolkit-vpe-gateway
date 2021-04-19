@@ -16,6 +16,22 @@ if [[ -z "${TMP_DIR}" ]]; then
 fi
 mkdir -p "${TMP_DIR}"
 
+JQ=$(command -v jq)
+if [[ -v "${JQ}" ]]; then
+  if [[ -f "${TMP_DIR}/bin/jq" ]]; then
+    JQ="${TMP_DIR}/bin/jq"
+  else
+    BIN_DIR="${TMP_DIR}/bin"
+    mkdir -p "${BIN_DIR}"
+
+    JQ="${BIN_DIR}/jq"
+
+    echo "jq cli not found. Installing..."
+    curl -Lo "${JQ}" https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 || exit 1
+    chmod +x "${JQ}"
+  fi
+fi
+
 echo "Logging into the ibmcloud account: region=${REGION}, resource_group=${RESOURCE_GROUP}"
 ibmcloud login --apikey "${IBMCLOUD_API_KEY}" -r "${REGION}" -g "${RESOURCE_GROUP}" || exit 1
 
@@ -26,11 +42,11 @@ ibmcloud is endpoint-gateway-targets --output JSON > "${TMP_OUTPUT}"
 if [[ "${SERVICE}" == "cloud-object-storage" ]]; then
   echo "Looking up object storage crn"
   cat "${TMP_OUTPUT}" | \
-    jq --arg SERVICE "${SERVICE}" --arg REGION "${REGION}" '.[] | select(.crn) | select(.crn|test($SERVICE)) | select(.crn|test($REGION))' > "${OUTPUT_FILE}"
+    "${JQ}" --arg SERVICE "${SERVICE}" --arg REGION "${REGION}" '.[] | select(.crn) | select(.crn|test($SERVICE)) | select(.crn|test($REGION))' > "${OUTPUT_FILE}"
 else
   echo "Looking up crn: ${CRN}"
   cat "${TMP_OUTPUT}" | \
-    jq --arg CRN "${CRN}" '.[] | select(.crn) | select(.crn == $CRN)' > "${OUTPUT_FILE}"
+    "${JQ}" --arg CRN "${CRN}" '.[] | select(.crn) | select(.crn == $CRN)' > "${OUTPUT_FILE}"
 fi
 
 if [[ -z "$(cat "${OUTPUT_FILE}")" ]]; then
@@ -40,6 +56,6 @@ if [[ -z "$(cat "${OUTPUT_FILE}")" ]]; then
   exit 1
 else
   echo "Found matching resource:"
-  echo "  CRN:           $(cat "${OUTPUT_FILE}" | jq '.crn')"
-  echo "  Resource type: $(cat "${OUTPUT_FILE}" | jq '.resource_type')"
+  echo "  CRN:           $(cat "${OUTPUT_FILE}" | "${JQ}" '.crn')"
+  echo "  Resource type: $(cat "${OUTPUT_FILE}" | "${JQ}" '.resource_type')"
 fi
