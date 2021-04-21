@@ -32,6 +32,8 @@ if [[ -v "${JQ}" ]]; then
   fi
 fi
 
+ibmcloud config --check-version=false
+
 echo "Logging into the ibmcloud account: region=${REGION}, resource_group=${RESOURCE_GROUP}"
 ibmcloud login --apikey "${IBMCLOUD_API_KEY}" -r "${REGION}" -g "${RESOURCE_GROUP}" || exit 1
 
