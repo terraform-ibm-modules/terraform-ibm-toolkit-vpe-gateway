@@ -25,6 +25,90 @@ versions:
             version: ">= 1.0.0"
       - id: resource
         refs: []
+        interface: github.com/cloud-native-toolkit/garage-terraform-modules#ibm-service
+        optional: true
+    variables:
+      - name: resource_group_name
+        moduleRef:
+          id: resource_group
+          output: name
+        type: string
+        description: The name of the IBM Cloud resource group where the VPC gateways will be created.
+      - name: region
+        scope: global
+        type: string
+        description: The IBM Cloud region where the cluster will be/has been installed.
+      - name: ibmcloud_api_key
+        scope: global
+        type: string
+        description: The IBM Cloud api token
+      - name: name_prefix
+        scope: global
+        type: string
+        description: The name of the vpc resource
+        default: ""
+        optional: true
+      - name: vpc_id
+        moduleRef:
+          id: vpc
+          output: id
+        type: string
+        description: The id of the vpc instance
+      - name: vpc_subnets
+        moduleRef:
+          id: subnets
+          output: subnets
+        type: |-
+          list(object({
+              label = string
+              id    = string
+              zone  = string
+            }))
+        description: List of subnets with labels
+      - name: vpc_subnet_count
+        moduleRef:
+          id: subnets
+          output: count
+        type: number
+        description: Number of vpc subnets
+      - name: resource_crn
+        moduleRef:
+          id: resource
+          output: crn
+        type: string
+        description: The crn of the resource to which the vpe will be connected.
+      - name: resource_service
+        moduleRef:
+          id: resource
+          output: service
+        type: string
+        description: The endpoint gateway target resource type. Values can be provider_cloud_service, provider_infrastructure_service, ?.
+      - name: resource_label
+        moduleRef:
+          id: resource
+          output: label
+        type: string
+        description: The label for the resource to which the vpe will be connected. Used as a tag and as part of the vpe name.
+    version: v1.2.3
+    outputs:
+      - name: id
+        description: The id of the created VPE gateway
+  - platforms: []
+    dependencies:
+      - id: resource_group
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-ibm-resource-group
+            version: ">= 1.0.0"
+      - id: vpc
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-ibm-vpc
+            version: ">= 1.0.0"
+      - id: subnets
+        refs:
+          - source: github.com/cloud-native-toolkit/terraform-ibm-vpc-subnets
+            version: ">= 1.0.0"
+      - id: resource
+        refs: []
         optional: true
     variables:
       - name: resource_group_name
