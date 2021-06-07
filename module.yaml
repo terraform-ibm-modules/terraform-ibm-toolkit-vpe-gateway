@@ -14,14 +14,10 @@ versions:
       refs:
         - source: github.com/cloud-native-toolkit/terraform-ibm-resource-group
           version: ">= 1.0.0"
-    - id: vpc
-      refs:
-        - source: github.com/cloud-native-toolkit/terraform-ibm-vpc
-          version: ">= 1.0.0"
     - id: subnets
       refs:
         - source: github.com/cloud-native-toolkit/terraform-ibm-vpc-subnets
-          version: ">= 1.0.0"
+          version: ">= 1.8.0"
     - id: resource
       refs: []
       interface: github.com/cloud-native-toolkit/garage-terraform-modules#ibm-service
@@ -39,8 +35,8 @@ versions:
       scope: global
     - name: vpc_id
       moduleRef:
-        id: vpc
-        output: id
+        id: subnets
+        output: vpc_id
     - name: vpc_subnets
       moduleRef:
         id: subnets
