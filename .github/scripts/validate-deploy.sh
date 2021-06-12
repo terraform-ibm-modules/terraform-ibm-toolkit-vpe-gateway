@@ -7,7 +7,7 @@ cat terraform.tfvars
 
 PREFIX_NAME=$(cat terraform.tfvars | grep name_prefix | sed "s/name_prefix=//g" | sed 's/"//g' | sed "s/_/-/g")
 REGION=$(cat terraform.tfvars | grep -E "^region" | sed "s/region=//g" | sed 's/"//g')
-RESOURCE_GROUP_NAME=$(cat terraform.tfvars | grep resource_group_name | sed "s/resource_group_name=//g" | sed 's/"//g')
+RESOURCE_GROUP_NAME=$(cat terraform.tfvars | grep -E "^resource_group_name" | sed "s/resource_group_name=//g" | sed 's/"//g')
 
 echo "PREFIX_NAME: ${PREFIX_NAME}"
 echo "REGION: ${REGION}"

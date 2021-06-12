@@ -5,7 +5,7 @@ module "vpe-cos" {
   region              = var.region
   ibmcloud_api_key    = var.ibmcloud_api_key
   name_prefix         = var.name_prefix
-  vpc_id              = module.vpc.id
+  vpc_id              = module.subnets.vpc_id
   vpc_subnets         = module.subnets.subnets
   vpc_subnet_count    = module.subnets.count
   resource_label      = module.cos.label
