@@ -1,15 +1,12 @@
 locals {
-  tmp_dir         = "${path.cwd}/.tmp"
+  tmp_dir         = "${path.cwd}/.tmp/${local.name}"
   crn_file_name   = "${local.tmp_dir}/endpoint-gateway-targets.json"
   endpoint_target = jsondecode(data.local_file.endpoint-target.content)
-  prefix_name       = var.name_prefix != "" ? var.name_prefix : var.resource_group_name
-  name              = lower(replace("${local.prefix_name}-vpe-${var.resource_label}", "_", "-"))
+  prefix_name     = var.name_prefix != "" ? var.name_prefix : var.resource_group_name
+  name            = lower(replace("${local.prefix_name}-vpe-${var.resource_label}", "_", "-"))
 }
 
 resource null_resource setup {
-  provisioner "local-exec" {
-    command = "mkdir -p ${local.tmp_dir}"
-  }
   provisioner "local-exec" {
     command = "echo 'Resource group name: ${var.resource_group_name}'"
   }
@@ -26,6 +23,10 @@ resource time_sleep wait_for_resource_initialization {
 
 resource null_resource get-endpoint-target {
   depends_on = [null_resource.setup, time_sleep.wait_for_resource_initialization]
+
+  triggers = {
+    always_run = timestamp()
+  }
 
   provisioner "local-exec" {
     command = "${path.module}/scripts/get-endpoint-target.sh ${var.resource_crn} ${var.resource_service} ${var.region} ${var.resource_group_name} ${local.crn_file_name}"
