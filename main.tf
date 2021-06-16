@@ -1,7 +1,6 @@
 locals {
   tmp_dir         = "${path.cwd}/.tmp/${local.name}"
   crn_file_name   = "${local.tmp_dir}/endpoint-gateway-targets.json"
-  endpoint_target = jsondecode(data.local_file.endpoint-target.content)
   prefix_name     = var.name_prefix != "" ? var.name_prefix : var.resource_group_name
   name            = lower(replace("${local.prefix_name}-vpe-${var.resource_label}", "_", "-"))
 }
@@ -57,7 +56,7 @@ data ibm_is_subnet subnets {
 }
 
 resource ibm_is_virtual_endpoint_gateway vpe-gateway {
-  depends_on = [time_sleep.wait_for_resource_initialization]
+  depends_on = [time_sleep.wait_for_resource_initialization, data.local_file.endpoint-target]
 
   name           = local.name
   vpc            = var.vpc_id
@@ -65,8 +64,8 @@ resource ibm_is_virtual_endpoint_gateway vpe-gateway {
   tags           = [var.resource_label]
 
   target {
-    crn           = local.endpoint_target.crn
-    resource_type = local.endpoint_target.resource_type
+    crn           = jsondecode(data.local_file.endpoint-target.content).crn
+    resource_type = jsondecode(data.local_file.endpoint-target.content).resource_type
   }
 
   # One reserved IP per zone in the VPC in the VPE subnets
