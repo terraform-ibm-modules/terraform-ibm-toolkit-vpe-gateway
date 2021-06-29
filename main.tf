@@ -12,6 +12,9 @@ resource null_resource setup {
   provisioner "local-exec" {
     command = "echo 'Resource crn: ${var.resource_crn}'"
   }
+  provisioner "local-exec" {
+    command = "echo 'Sync value: ${var.sync}'"
+  }
 }
 
 resource time_sleep wait_for_resource_initialization {

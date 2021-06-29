@@ -53,3 +53,9 @@ variable "resource_service" {
   type        = string
   description = "The endpoint gateway target resource type. Values can be provider_cloud_service, provider_infrastructure_service, ?."
 }
+
+variable "sync" {
+  type        = string
+  description = "Value used to synchronize dependencies between modules"
+  default     = ""
+}
