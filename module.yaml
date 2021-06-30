@@ -20,7 +20,11 @@ versions:
           version: ">= 1.8.0"
     - id: resource
       refs: []
-      interface: github.com/cloud-native-toolkit/garage-terraform-modules#ibm-service
+      interface: github.com/cloud-native-toolkit/automation-modules#ibm-service
+      optional: true
+    - id: sync
+      refs: []
+      interface: github.com/cloud-native-toolkit/automation-modules#sync
       optional: true
   variables:
     - name: resource_group_name
@@ -57,3 +61,7 @@ versions:
       moduleRef:
         id: resource
         output: label
+    - name: sync
+      moduleRef:
+        id: sync
+        output: sync
