@@ -41,8 +41,8 @@ TMP_OUTPUT="${TMP_DIR}/endpoints.tmp"
 
 echo "Getting endpoint gateway targets"
 ibmcloud is endpoint-gateway-targets --output JSON > "${TMP_OUTPUT}"
-if [[ "${SERVICE}" == "cloud-object-storage" ]]; then
-  echo "Looking up object storage crn"
+if [[ "${SERVICE}" == "cloud-object-storage" ]] || [[ "${SERVICE}" == "container-registry" ]]; then
+  echo "Looking up ${SERVICE} crn"
   cat "${TMP_OUTPUT}" | \
     "${JQ}" --arg SERVICE "${SERVICE}" --arg REGION "${REGION}" '.[] | select(.crn) | select(.crn|test($SERVICE)) | select(.crn|test($REGION))' > "${OUTPUT_FILE}"
 else
