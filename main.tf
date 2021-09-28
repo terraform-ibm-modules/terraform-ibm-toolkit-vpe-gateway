@@ -15,6 +15,9 @@ resource null_resource setup {
   provisioner "local-exec" {
     command = "echo 'Sync value: ${var.sync}'"
   }
+  provisioner "local-exec" {
+    command = "echo 'Subnets: ${jsonencode(var.vpc_subnets[*].id)}'"
+  }
 }
 
 resource time_sleep wait_for_resource_initialization {
