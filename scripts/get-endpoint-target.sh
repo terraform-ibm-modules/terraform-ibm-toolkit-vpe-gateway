@@ -1,63 +1,52 @@
 #!/usr/bin/env bash
 
-CRN="$1"
-SERVICE="$2"
-REGION="$3"
-RESOURCE_GROUP="$4"
-OUTPUT_FILE="$5"
+INPUT=$(tee)
+
+BIN_DIR=$(echo "${INPUT}" | grep "bin_dir" | sed -E 's/.*"bin_dir": ?"([^"]*)".*/\1/g')
+
+export PATH="${BIN_DIR}:${PATH}"
+
+if ! command -v jq 1> /dev/null 2> /dev/null; then
+  echo "jq cli not found" >&2
+  exit 1
+fi
+
+CRN=$(echo "${INPUT}" | jq -r '.resource_crn // empty')
+SERVICE=$(echo "${INPUT}" | jq -r '.resource_service // empty')
+REGION=$(echo "${INPUT}" | jq -r '.region //empty')
+RESOURCE_GROUP=$(echo "${INPUT}" | jq -r '.resource_group_name // empty')
+IBMCLOUD_API_KEY=$(echo "${INPUT}" | jq -r '.ibmcloud_api_key // empty')
+TMP_DIR=$(echo "${INPUT}" | jq -r '.tmp_dir // empty')
 
 if [[ -z "${IBMCLOUD_API_KEY}" ]]; then
-  echo "IBMCLOUD_API_KEY is required as an environment variable"
+  echo "IBMCLOUD_API_KEY is required" >&2
   exit 1
 fi
 
 if [[ -z "${TMP_DIR}" ]]; then
-  TMP_DIR="./tmp"
+  TMP_DIR=".tmp/vpe-gateway"
 fi
 mkdir -p "${TMP_DIR}"
 
-JQ=$(command -v jq)
-if [[ -v "${JQ}" ]]; then
-  if [[ -f "${TMP_DIR}/bin/jq" ]]; then
-    JQ="${TMP_DIR}/bin/jq"
-  else
-    BIN_DIR="${TMP_DIR}/bin"
-    mkdir -p "${BIN_DIR}"
+ibmcloud login -r "${REGION}" --apikey "${IBMCLOUD_API_KEY}" 1> /dev/null && ENDPOINT_TARGETS=$(ibmcloud is endpoint-gateway-targets --output JSON)
 
-    JQ="${BIN_DIR}/jq"
+if [[ "${SERVICE}" == "cloud-object-storage" ]] || [[ "${SERVICE}" == "container-registry" ]]; then
+  OUTPUT=$(echo "${ENDPOINT_TARGETS}" | \
+    jq --arg SERVICE "${SERVICE}" --arg REGION "${REGION}" '.[] | select(.crn) | select(.crn|test($SERVICE)) | select(.crn|test($REGION))')
 
-    echo "jq cli not found. Installing..."
-    curl -Lo "${JQ}" https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 || exit 1
-    chmod +x "${JQ}"
+  if [[ -n "${OUTPUT}" ]]; then
+    echo "${OUTPUT}" | jq '{"crn": .crn, "resource_type": .resource_type}'
+    exit 0
+  fi
+else
+  OUTPUT=$(echo "${ENDPOINT_TARGETS}" | \
+    jq --arg CRN "${CRN}" '.[] | select(.crn) | select(.crn == $CRN)')
+
+  if [[ -n "${OUTPUT}" ]]; then
+    echo "${OUTPUT}" | jq '{"crn": .crn, "resource_type": .resource_type}'
+    exit 0
   fi
 fi
 
-ibmcloud config --check-version=false
-
-echo "Logging into the ibmcloud account: region=${REGION}, resource_group=${RESOURCE_GROUP}"
-ibmcloud login --apikey "${IBMCLOUD_API_KEY}" -r "${REGION}" -g "${RESOURCE_GROUP}" || exit 1
-
-TMP_OUTPUT="${TMP_DIR}/endpoints.tmp"
-
-echo "Getting endpoint gateway targets"
-ibmcloud is endpoint-gateway-targets --output JSON > "${TMP_OUTPUT}"
-if [[ "${SERVICE}" == "cloud-object-storage" ]] || [[ "${SERVICE}" == "container-registry" ]]; then
-  echo "Looking up ${SERVICE} crn"
-  cat "${TMP_OUTPUT}" | \
-    "${JQ}" --arg SERVICE "${SERVICE}" --arg REGION "${REGION}" '.[] | select(.crn) | select(.crn|test($SERVICE)) | select(.crn|test($REGION))' > "${OUTPUT_FILE}"
-else
-  echo "Looking up crn: ${CRN}"
-  cat "${TMP_OUTPUT}" | \
-    "${JQ}" --arg CRN "${CRN}" '.[] | select(.crn) | select(.crn == $CRN)' > "${OUTPUT_FILE}"
-fi
-
-if [[ -z "$(cat "${OUTPUT_FILE}")" ]]; then
-  echo "The output file is empty"
-  # Create the file with an empty object to satisy destroy
-  echo "{}" > "${OUTPUT_FILE}"
-  exit 1
-else
-  echo "Found matching resource:"
-  echo "  CRN:           $(cat "${OUTPUT_FILE}" | "${JQ}" '.crn')"
-  echo "  Resource type: $(cat "${OUTPUT_FILE}" | "${JQ}" '.resource_type')"
-fi
+echo "Unable to find endpoint: ${CRN}, ${SERVICE}, ${REGION}" >&2
+exit 1

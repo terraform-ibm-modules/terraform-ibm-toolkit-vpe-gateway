@@ -26,27 +26,27 @@ resource time_sleep wait_for_resource_initialization {
   create_duration = "3m"
 }
 
-resource null_resource get-endpoint-target {
-  depends_on = [null_resource.setup, time_sleep.wait_for_resource_initialization]
+module setup_clis {
+  source = "cloud-native-toolkit/clis/util"
+  version = "1.10.0"
 
-  triggers = {
-    always_run = timestamp()
-  }
-
-  provisioner "local-exec" {
-    command = "${path.module}/scripts/get-endpoint-target.sh ${var.resource_crn} ${var.resource_service} ${var.region} ${var.resource_group_name} ${local.crn_file_name}"
-
-    environment = {
-      IBMCLOUD_API_KEY = var.ibmcloud_api_key
-      TMP_DIR          = local.tmp_dir
-    }
-  }
+  clis = ["jq", "ibmcloud-is"]
 }
 
-data local_file endpoint-target {
-  depends_on = [null_resource.get-endpoint-target]
+data external endpoint-target {
+  depends_on = [null_resource.setup, time_sleep.wait_for_resource_initialization]
 
-  filename = local.crn_file_name
+  program = ["bash", "${path.module}/scripts/get-endpoint-target.sh"]
+
+  query = {
+    bin_dir = module.setup_clis.bin_dir
+    resource_crn = var.resource_crn
+    resource_service = var.resource_service
+    region = var.region
+    resource_group_name = var.resource_group_name
+    ibmcloud_api_key = var.ibmcloud_api_key
+    tmp_dir = local.tmp_dir
+  }
 }
 
 data ibm_resource_group resource_group {
@@ -62,7 +62,7 @@ data ibm_is_subnet subnets {
 }
 
 resource ibm_is_virtual_endpoint_gateway vpe-gateway {
-  depends_on = [time_sleep.wait_for_resource_initialization, data.local_file.endpoint-target]
+  depends_on = [time_sleep.wait_for_resource_initialization]
 
   name           = local.name
   vpc            = var.vpc_id
@@ -70,8 +70,8 @@ resource ibm_is_virtual_endpoint_gateway vpe-gateway {
   tags           = [var.resource_label]
 
   target {
-    crn           = jsondecode(data.local_file.endpoint-target.content).crn
-    resource_type = jsondecode(data.local_file.endpoint-target.content).resource_type
+    crn           = data.external.endpoint-target.result.crn
+    resource_type = data.external.endpoint-target.result.resource_type
   }
 
   # One reserved IP per zone in the VPC in the VPE subnets
