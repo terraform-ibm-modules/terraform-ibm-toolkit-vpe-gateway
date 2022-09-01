@@ -1,6 +1,7 @@
 module "resource_group" {
   source = "github.com/cloud-native-toolkit/terraform-ibm-resource-group.git"
+
+  resource_group_name = var.resource_group_name
   
-  resource_group_name    = module.resource_group.name
   ibmcloud_api_key    = var.ibmcloud_api_key
 }
