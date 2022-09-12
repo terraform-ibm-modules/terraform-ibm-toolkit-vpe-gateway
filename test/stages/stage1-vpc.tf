@@ -7,7 +7,7 @@ module "vpc" {
   name_prefix = "${var.vpc_name}-${random_string.suffix.result}"
 }
 
-resource "random_string" "random" {
+resource "random_string" "suffix" {
   length           = 16
   special          = true
   override_special = "/@£$"
