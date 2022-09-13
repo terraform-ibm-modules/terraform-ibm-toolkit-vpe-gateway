@@ -10,5 +10,5 @@ module "vpc" {
 resource "random_string" "suffix" {
   length           = 16
   special          = true
-  override_special = "/@£$"
+  override_special = "/@£"
 }
