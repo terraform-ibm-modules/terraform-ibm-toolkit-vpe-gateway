@@ -16,6 +16,7 @@ module "vpe-redis" {
 
 resource "random_string" "suffix-redis" {
   length           = 16
-  special          = true
+  special          = false
+  upper = false
   override_special = "/*$"
 }

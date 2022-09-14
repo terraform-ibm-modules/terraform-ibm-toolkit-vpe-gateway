@@ -16,6 +16,7 @@ module "vpe-cos" {
 
 resource "random_string" "suffix-cos" {
   length           = 16
-  special          = true
+  special          = false
+  upper = false
   override_special = "/*$"
 }
