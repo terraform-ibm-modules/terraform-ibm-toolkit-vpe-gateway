@@ -16,7 +16,7 @@ module "vpe-icr" {
 
 resource "random_string" "suffix-icr" {
   length           = 16
-   special          = false
+  special          = false
   upper = false
   override_special = "/*$"
 }
