@@ -17,5 +17,5 @@ module "vpe-icr" {
 resource "random_string" "suffix-icr" {
   length           = 16
   special          = true
-  override_special = "/@£"
+  override_special = "/*$"
 }

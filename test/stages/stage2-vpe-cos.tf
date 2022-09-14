@@ -17,5 +17,5 @@ module "vpe-cos" {
 resource "random_string" "suffix-cos" {
   length           = 16
   special          = true
-  override_special = "/@£"
+  override_special = "/*$"
 }

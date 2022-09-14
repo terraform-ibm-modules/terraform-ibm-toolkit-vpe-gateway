@@ -17,5 +17,5 @@ module "vpe-redis" {
 resource "random_string" "suffix-redis" {
   length           = 16
   special          = true
-  override_special = "/@£"
+  override_special = "/*$"
 }
