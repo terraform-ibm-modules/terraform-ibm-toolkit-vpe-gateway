@@ -5,7 +5,7 @@ module "vpe-icr" {
   region              = var.region
   ibmcloud_api_key    = var.ibmcloud_api_key
   #name_prefix         = var.name_prefix
-  name_prefix = "${random_string.suffix.result}"
+  name_prefix = "${random_string.suffix-icr.result}"
   vpc_id              = module.subnets.vpc_id
   vpc_subnets         = module.subnets.subnets
   vpc_subnet_count    = module.subnets.count
@@ -14,7 +14,7 @@ module "vpe-icr" {
   resource_service    = module.icr.service
 }
 
-resource "random_string" "suffix" {
+resource "random_string" "suffix-icr" {
   length           = 16
   special          = true
   override_special = "/@£"
