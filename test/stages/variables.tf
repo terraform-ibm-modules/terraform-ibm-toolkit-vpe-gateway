@@ -18,6 +18,7 @@ variable "region" {
 variable "namespace" {
   type        = string
   description = "Namespace for tools"
+  default="vpe-tools"
 }
 
 variable "name_prefix" {
